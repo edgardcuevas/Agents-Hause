@@ -1,0 +1,164 @@
+﻿<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Casa de Agentes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Pixelify+Sans:wght@500;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="topbar">
+    <div class="brand">
+      <h1>Casa de Agentes</h1>
+      <p class="sub"><span class="status" id="liveStatus" data-mode="demo">Demo</span> <span id="liveText">Prototipo con estados simulados. Aún no está conectado a OpenCode ni a Codex.</span></p>
+    </div>
+    <div class="toolbar">
+      <button id="btnMini" type="button">Mini</button>
+      <button id="btnStop" type="button">Detener</button>
+      <button id="btnMode" type="button">Demo</button>
+      <button id="btnReconnect" type="button">Reconectar</button>
+    </div>
+  </header>
+
+  <div class="main">
+  <div class="viewport" id="viewport" role="application" aria-label="Casa de agentes. Arrastra para mover, usa la rueda o los botones para el zoom, toca un agente para ver qué hace y haz doble clic o doble toque en un espacio vacío para ver todo." tabindex="0">
+    <div class="stage" id="stage">
+      <canvas id="house" width="384" height="576"></canvas>
+    </div>
+    <button class="mini-expand" id="zexpand" type="button">Ampliar</button>
+    <div class="ctl">
+      <button id="zin" type="button" aria-label="Acercar">+</button>
+      <button id="zout" type="button" aria-label="Alejar">−</button>
+      <button id="zfit" type="button">Ver todo</button>
+      <button id="zmini" type="button">Mini</button>
+    </div>
+    <div class="vhint">Arrastra para mover · rueda o pellizco para zoom · doble clic/toque vacío: ver todo</div>
+    <div class="info" id="info" hidden>
+      <button class="x" id="infoClose" type="button" aria-label="Cerrar ficha">×</button>
+      <div class="ihead"><span class="dot" id="iDot"></span><div><b id="iName"></b><span class="agent-meta" id="iMeta"></span></div></div>
+      <div class="istate" id="iState"></div>
+      <p class="idesc" id="iDesc"></p>
+      <dl class="idl"><dt>Herramienta</dt><dd id="iTool"></dd><dt>Lugar</dt><dd id="iRoom"></dd><dt>Proyecto</dt><dd id="iProject"></dd><dt>Desde hace</dt><dd id="iTime"></dd></dl>
+      <button class="btn-personalizar" id="iCustom" type="button">Personalizar</button>
+      <p class="inote">Datos de la demo, no de un agente real.</p>
+    </div>
+  </div>
+
+  <div class="side">
+    <section class="card" aria-labelledby="h-agentes">
+      <h2 id="h-agentes">Agentes</h2>
+      <p class="hint">El borde de la etiqueta indica el gestor. Toca un agente y pulsa Personalizar para cambiar su look.</p>
+      <div class="agents" id="agents"></div>
+      <div class="row">
+        <button class="toggle" id="demo" type="button" aria-pressed="true">Demo automática: activa</button>
+      </div>
+      <p class="hint">Para conectarlo después, cada adaptador solo llama <code>setAgentState("opencode", "codigo")</code> con el estado que corresponda.</p>
+    </section>
+
+    <section class="card" aria-labelledby="h-estados">
+      <h2 id="h-estados">Qué está haciendo <span id="who" style="color: var(--muted)"></span></h2>
+      <p class="hint">Elige un agente (o tócalo en la casa) y cámbiale el estado. Debajo de cada uno va la herramienta de ejemplo que lo dispararía.</p>
+      <div class="states" id="states"></div>
+    </section>
+  </div>
+  </div>
+</div>
+
+<dialog id="custom" aria-labelledby="cTitle">
+  <div class="cform">
+    <div class="chead">
+      <h2 id="cTitle">Personalizar agente</h2>
+      <button class="cclose" id="cClose" type="button" aria-label="Cerrar">×</button>
+    </div>
+    <div class="cbody">
+      <div class="cpreview">
+        <canvas id="cPreview" width="32" height="32" aria-label="Vista previa del agente"></canvas>
+        <div class="cturnos" role="group" aria-label="Girar la vista previa">
+          <button type="button" data-dir="down" aria-pressed="true">Abajo</button>
+          <button type="button" data-dir="left" aria-pressed="false">Izquierda</button>
+          <button type="button" data-dir="up" aria-pressed="false">Arriba</button>
+          <button type="button" data-dir="right" aria-pressed="false">Derecha</button>
+        </div>
+          <div class="cwalk" role="group" aria-label="Animacion de caminar">
+            <button type="button" data-walk="0" aria-pressed="true">Quieto</button>
+            <button type="button" data-walk="1" aria-pressed="false">Caminando</button>
+          </div>
+      </div>
+      <div class="ccampos">
+        <label class="ccampo">Alias
+          <input id="cAlias" type="text" maxlength="24" autocomplete="off" placeholder="Nombre de la sesión">
+        </label>
+        <div class="ccampo">
+          <span class="clabel">Camisa</span>
+          <div class="cswatches" id="cSwCamisa" role="group" aria-label="Colores de camisa"></div>
+          <div class="cfila">
+            <label class="cotro">Otro <input type="color" id="cCamisa" value="#d9702f"></label>
+            <button type="button" class="cdefault" data-color="camisa">Por defecto</button>
+          </div>
+        </div>
+        <div class="ccampo">
+          <span class="clabel">Piel</span>
+          <div class="cswatches" id="cSwPiel" role="group" aria-label="Colores de piel"></div>
+          <div class="cfila">
+            <label class="cotro">Otro <input type="color" id="cPiel" value="#f6dcc2"></label>
+            <button type="button" class="cdefault" data-color="piel">Por defecto</button>
+          </div>
+        </div>
+        <div class="ccampo">
+          <span class="clabel">Pelo</span>
+          <div class="cswatches" id="cSwPelo" role="group" aria-label="Colores de pelo"></div>
+          <div class="cfila">
+            <label class="cotro">Otro <input type="color" id="cPelo" value="#5a3d2b"></label>
+            <button type="button" class="cdefault" data-color="pelo">Por defecto</button>
+          </div>
+        </div>
+        <div class="ccampo">
+          <span class="clabel">Pantalón</span>
+          <div class="cswatches" id="cSwPantalon" role="group" aria-label="Colores de pantalón"></div>
+          <div class="cfila">
+            <label class="cotro">Otro <input type="color" id="cPantalon" value="#3a4058"></label>
+            <button type="button" class="cdefault" data-color="pantalon">Por defecto</button>
+          </div>
+        </div>
+        <div class="ccampo">
+          <span class="clabel">Color del gorro</span>
+          <div class="cswatches" id="cSwGorroColor" role="group" aria-label="Colores del gorro"></div>
+          <div class="cfila">
+            <label class="cotro">Otro <input type="color" id="cGorroColor" value="#3b78d4"></label>
+            <button type="button" class="cdefault" data-color="gorroColor">Por defecto</button>
+          </div>
+        </div>
+        <label class="ccampo">Gorro
+          <select id="cGorro"></select>
+        </label>
+        <label class="ccampo">Peinado
+          <select id="cPeinado"></select>
+        </label>
+        <div class="ccampo">
+          <span class="clabel">Accesorios <small>(uno por ranura)</small></span>
+          <div class="caccesorios" id="cAccs"></div>
+        </div>
+      </div>
+    </div>
+    <div class="cacciones">
+      <button type="button" id="cSave" class="cprimario">Guardar</button>
+      <button type="button" id="cCancel">Cancelar</button>
+      <button type="button" id="cRandom">Aleatorio</button>
+      <button type="button" id="cUndo">Deshacer</button>
+      <button type="button" id="cReset">Restablecer look</button>
+    </div>
+  </div>
+</dialog>
+
+<script src="catalogo.js"></script>
+<script src="app.js"></script>
+<script src="vida.js"></script>
+<script src="live.js"></script>
+<script src="perfiles.js"></script>
+<script src="efectos.js"></script>
+<script src="galeria.js"></script>
+
+</body></html>

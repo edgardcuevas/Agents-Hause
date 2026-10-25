@@ -1,0 +1,23 @@
+{
+  "name": "casa-de-agentes",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Casa de Agentes: servidor local y maqueta para observar agentes de código.",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "test": "node --test",
+    "casa": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/iniciar-casa.ps1",
+    "casa:mini": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/iniciar-casa.ps1 -Mini",
+    "casa:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/detener-casa.ps1",
+    "casa:install": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/instalar-acceso.ps1",
+    "casa:uninstall": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/desinstalar-acceso.ps1"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@opencode/client": "^2.1.4"
+  }
+}
