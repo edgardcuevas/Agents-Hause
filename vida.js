@@ -483,7 +483,7 @@
       if (catBub) catBub.hidden = true;
       return;
     }
-    drawCatSprite(g, px, py, cat.state, cat.path.length > 0 ? (Math.floor(t * 8) % 2) : 0, t);
+    drawCatSprite(g, px, py, cat.state, cat.path.length > 0 ? (Math.floor(t * 8) % 2) : 0, t, cat.dir);
     const s = stageEl.clientWidth / (COLS * T);
     const show = catBubble && t < catBubbleUntil;
     if (catBub) {
@@ -497,7 +497,7 @@
     }
   }
 
-  function drawCatSprite(g, px, py, state, frame, t) {
+  function drawCatSprite(g, px, py, state, frame, t, dir = 'down') {
     const INK = '#2b2420';
     const body = '#e6a35f', dark = '#c9823f', light = '#f0c08a';
     const R = (x, y, w, h, c) => { g.fillStyle = c; g.fillRect(x, y, w, h); };
@@ -600,33 +600,41 @@
       R(px + 8, py + 1, 2, 3, INK);
       R(px + 4, py + 5, 1, 1, INK);
       R(px + 6, py + 5, 1, 1, INK);
-    } else if (state === 'huir') {
-      // corriendo
-      const f = frame % 2;
-      R(px + 3, py + 8, 10, 8, INK);
-      R(px + 4, py + 9 + (f ? 1 : 0), 8, 6, body);
-      R(px + 6, py + 9, 2, 6, dark);
-      R(px + 9, py + 9, 2, 6, dark);
-      R(px + 3, py + 3, 7, 6, INK);
-      R(px + 4, py + 4, 5, 4, body);
-      R(px + 2, py + 1, 2, 3, INK);
-      R(px + 7, py + 1, 2, 3, INK);
-      R(px + 4, py + 5, 1, 1, INK);
-      R(px + 6, py + 5, 1, 1, INK);
-      // orejas hacia atrás
-    } else {
-      // caminar (default)
-      const f = frame % 2;
-      R(px + 3, py + 8, 10, 8, INK);
-      R(px + 4, py + 9 + (f ? 1 : 0), 8, 6, body);
-      R(px + 6, py + 9, 2, 6, dark);
-      R(px + 9, py + 9, 2, 6, dark);
-      R(px + 3, py + 3, 7, 6, INK);
-      R(px + 4, py + 4, 5, 4, body);
-      R(px + 3, py + 1, 2, 3, INK);
-      R(px + 8, py + 1, 2, 3, INK);
-      R(px + 4, py + 5, 1, 1, INK);
-      R(px + 6, py + 5, 1, 1, INK);
+    } else if (state === 'caminar' || state === 'huir') {
+      const angle = dir === 'left' ? Math.PI : dir === 'up' ? -Math.PI / 2 : dir === 'down' ? Math.PI / 2 : 0;
+      const bob = frame ? -1 : 0;
+      const P = (x, y, w, h, c) => R(x, y + bob, w, h, c);
+      g.save();
+      g.translate(px + 8, py + 9);
+      g.rotate(angle);
+      const leg = frame ? 1 : -1;
+      P(-5, -2, 9, 6, INK);
+      P(-4, -3, 7, 1, INK);
+      P(-4, 4, 7, 1, INK);
+      P(-4, -1, 7, 4, body);
+      P(-2, -1, 2, 4, dark);
+      P(1, -1, 2, 4, light);
+      P(-5, 2 + leg, 2, 4, INK);
+      P(-4, 3 + leg, 1, 2, body);
+      P(-1, 2 - leg, 2, 4, INK);
+      P(0, 3 - leg, 1, 2, body);
+      P(2, 2 - leg, 2, 4, INK);
+      P(3, 3 - leg, 1, 2, body);
+      P(4, 2 + leg, 2, 4, INK);
+      P(5, 3 + leg, 1, 2, body);
+      const tailY = frame ? -5 : -3;
+      P(-8, tailY, 2, 5, INK);
+      P(-9, tailY - 2, 2, 3, INK);
+      P(-8, tailY, 1, 3, body);
+      P(2, -4, 6, 7, INK);
+      P(3, -3, 4, 5, body);
+      P(3, -6, 2, 3, INK);
+      P(7, -5, 2, 3, INK);
+      P(4, -5, 1, 1, light);
+      P(6, -3, 1, 1, INK);
+      P(8, -1, 2, 2, INK);
+      P(9, 0, 1, 1, '#e88a86');
+      g.restore();
     }
   }
 
